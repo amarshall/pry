@@ -147,7 +147,7 @@ class Pry
           $stdout
         end
 
-        if text.lines.count < page_size || !Pry.pager
+        if text.lines.count <= 3 || !Pry.pager
           out.puts text
           return
         end
@@ -199,14 +199,10 @@ class Pry
         output = args.first if args.any?
 
         params = []
-        params << "-R" unless options[:color] == false
-        params << "-S" unless options[:wrap] == true
-        params << "-F" unless options[:always] == true
         if options[:tail] == true
           params << "+\\>"
           $stderr.puts "Seeking to end of stream..."
         end
-        params << "-X"
 
         IO.popen("less #{params * ' '}", "w") do |less|
           if output

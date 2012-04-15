@@ -119,6 +119,7 @@ class Pry
             rescue Pry::RescuableException
               next
             end
+            doc.insert 0, "\n#{Pry::Helpers::Text.bold('From:')} #{file_name} @ line #{line}:\n\n"
           end
           doc
         end
@@ -128,16 +129,18 @@ class Pry
           raise Pry::CommandError, "No documentation found." if meth.doc.nil? || meth.doc.empty?
 
           doc = process_comment_markup(meth.doc, meth.source_type)
-          output.puts make_header(meth, doc)
-          output.puts "#{text.bold("Owner:")} #{meth.owner || "N/A"}"
-          output.puts "#{text.bold("Visibility:")} #{meth.visibility}"
-          output.puts "#{text.bold("Signature:")} #{meth.signature}"
-          output.puts
 
           if use_line_numbers?
             doc = Code.new(doc, start_line, :text).
               with_line_numbers(true).to_s
           end
+
+          header = make_header(meth, doc).gsub(/^\s+/, '')
+          header << "#{text.bold("Owner:")} #{meth.owner || "N/A"}\n"
+          header << "#{text.bold("Visibility:")} #{meth.visibility}\n"
+          header << "#{text.bold("Signature:")} #{meth.signature}\n"
+          header << "\n"
+          doc.insert 0, header
 
           doc
         end
